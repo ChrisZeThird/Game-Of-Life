@@ -12,9 +12,6 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 import matplotlib.animation as animation
 
-# import tkinter as tk
-
-
 """ Rules of the Game of Life """
 
 def update(grid):
@@ -153,13 +150,3 @@ exit_button.on_clicked(escape)
 
 # Connect buttons to figure
 fig.canvas.mpl_connect('button_press_event', turn_on) # connect cells management to figure
-
-# """ Tkinter environnement link """
-
-# exit_button_tk = tk.Button(root, text="Quit", command=root.destroy) #button to close the window
-# my_button = tk.Button(root, text='Play!', command=main)
-
-# exit_button_tk.pack()
-# my_button.pack()
-
-# root.mainloop()
