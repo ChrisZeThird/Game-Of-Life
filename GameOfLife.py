@@ -106,7 +106,10 @@ def turn_on(event):
     i = N - 1 - int(gy) 
     j = int(gx) 
     
-    data[i,j] = 1 # on click, turns cell on
+    if data[i,j] == 0:
+        data[i,j] = 1 # on click, turns cell on
+    else:
+        data[i,j] = 0 # on click, turns cell off if it was on already
     global img
     img.set_data(data) # update the imshow 
     
