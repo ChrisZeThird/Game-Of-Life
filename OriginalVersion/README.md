@@ -1,0 +1,1 @@
+This file is the original project of the Game Of Life. 0 player, automated process with an initial condition. Not object oriented. I wanted to keep it to have a reference working and very simple to use.
