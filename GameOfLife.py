@@ -5,7 +5,7 @@ Created on Sun Oct 23 10:50:50 2022
 
 @author: ChrisZeThird
 
-Special thanks to ConfusedReptile#6830 on discord for their help on 
+Special thanks to ConfusedReptile#6830 on discord for their help on the animation setup.
 """
 import numpy as np
 
