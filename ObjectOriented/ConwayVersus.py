@@ -14,6 +14,22 @@ import matplotlib.cm as cm
 
 import ConwayClassic as cc
 
+""" Useful methods """
+
+def findTrueList(L):
+    """ Returns a list of int values giving the True value
+        positions in L"""
+    return [i for i, x in enumerate(L) if x]
+
+def equalArr(a,b):
+    """ Retruns boolean, test if two arrays are the same"""
+    return (a == b).all()
+
+def findArrList(arr,L):
+    """ Returns of the indexes where an element matches the array arr"""
+    return [equalArr(arr,x) for x in L]
+
+
 """ Classes """
 
 class Versus():
@@ -50,7 +66,6 @@ class Versus():
         self.fig.suptitle(f'Each player has {self.nbr} cells to place', fontsize=20, fontname='Helvetica')
         
         self.textvar = self.fig.text(0,0,'') # useful for later, when displaying winner
-        self.textvar.set_visible(False)
         
         ## Draw initial configuration
         self.img = self.ax.imshow(self.data, cmap='CMRmap', extent=[0, self.N, 0, self.N], vmin=0, vmax=1)
@@ -97,16 +112,7 @@ class Versus():
             
         if ((abs(total1 - total2) == 2) or (abs(total1 - total2) == 3)):
             return p
-        
-        # elif ((total1 == 3) and ((total1 < 2) or (total2 > 3))):
-        #     return p
-        
-        # elif (((total1 > 3) or (total1 < 2)) and ((total2 > 3)) or (total2 < 2)):
-        #     return 0
-        
-        # elif (((total1 > 3) or (total1 < 2)) and (total2 == 3)):
-        #     return q
-        
+
         elif ((abs(total1 - total2) == 1) and (total1 > 1)):
             return p
         
@@ -163,13 +169,19 @@ class Versus():
                 else:
                     if ((total1 == 3) and (total2 != 3)):
                         newGrid[i,j] = p1
+                        self.count_p1 += 1
                     
                     elif ((total1 != 3) and (total2 == 3)):
                         newGrid[i,j] = p2
+                        self.count_p2 += 1
                     
                     elif ((total1 == 3) and (total2 == 3)):
                         p = np.random.choice([self.p1,self.p2])
                         newGrid[i,j] = p
+                        if p == p1:
+                            self.count_p1 += 1
+                        else:
+                            self.count_p2 += 1
                     
         ## Updated data
         self.data = newGrid
@@ -184,24 +196,30 @@ class Versus():
         gx = event.xdata # x coordinate of the mouse
         gy = event.ydata # y coordinate of the mouse
         
-        self.count_p1 = np.count_nonzero(self.data == self.p1)
-        self.count_p2 = np.count_nonzero(self.data == self.p2)
+        # self.count_p1 = np.count_nonzero(self.data == self.p1)
+        # self.count_p2 = np.count_nonzero(self.data == self.p2)
         
         # mouse coordinate (x,y) correspond to array indexes [i,j] with i = N-1 - y and j = x
         i = self.N - 1 - int(gy) 
         j = int(gx) 
+        
         if self.data[i,j] == 0:
             if (self.current_player == 'P1') and (self.count_p1 < (self.nbr + 1)): # checks if player 1 reaches max cell number
                 self.data[i,j] = self.p1 # on click, turns cell on for player 1
+                # print('before: ', self.count_p1)
+                self.count_p1 += 1
+                # print('after: ', self.count_p1)
             elif (self.current_player == 'P2') and (self.count_p2 < (self.nbr + 1)): # checks if player 2 reaches max cell number
                 self.data[i,j] = self.p2 # on click, turns cell on for player 2
-                
+                # print('before: ', self.count_p2)
+                self.count_p2 += 1
+                # print('after: ', self.count_p2)
         else:
-            if (self.current_player == 'P1') and (self.data[i,j] == self.p1) :
+            if (self.current_player == 'P1') and (self.data[i,j] == self.p1) and (self.count_p1 > 0):
                 self.data[i,j] = 0 # on click, turns cell off if it was on already, for player 1
                 self.count_p1 -= 1 # substract cell from total cells count of player 1
             
-            elif (self.current_player == 'P2') and (self.data[i,j] == self.p2):
+            elif (self.current_player == 'P2') and (self.data[i,j] == self.p2) and (self.count_p2 > 0):
                 self.data[i,j] = 0 # on click, turns cell off if it was on already, for player 2
                 self.count_p2 -= 1 # substract cell from total cells count of player 2
                 
@@ -217,9 +235,7 @@ class Versus():
         self.data = np.zeros((self.N,self.N)) # reset the array to all zeros
         
         (self.img).set_data(self.data)
-        # self.ax_title_visible = False # useful for later, when displaying winner
-        # self.fig.canvas.draw_idle()
-
+        
         self.count_p1 = 0
         self.count_p2 = 0
         
@@ -229,11 +245,13 @@ class Versus():
 
     def start_game(self,event):
         self.ani = animation.FuncAnimation(self.fig, self._update, interval=100, save_count=60)
+        # self.ani.save('animation_versus1.gif') # Uncomment if you want to save the animation as a gif # uncomment to save animation
     
     def _update(self,frame):
         
         previous_count_p1 = np.count_nonzero(self.data == self.p1)
         previous_count_p2 = np.count_nonzero(self.data == self.p2)
+        
         self.update(self.data)
         
         self.count_p1 = np.count_nonzero(self.data == self.p1)
@@ -241,21 +259,47 @@ class Versus():
         
         if (self.count_p1 == 0) and (self.count_p2 != 0):
             self.ani.event_source.stop()
+            Artist.remove(self.textvar)
             self.textvar = self.fig.text(0.5, 0.05, 'PLAYER 2 WINS!', color=self.c2, ha='center', fontsize=25, fontweight='bold')
         
         elif (self.count_p1 != 0) and (self.count_p2 == 0):
             self.ani.event_source.stop()
+            Artist.remove(self.textvar)
             self.textvar = self.fig.text(0.5, 0.05, 'PLAYER 1 WINS!', color=self.c1, ha='center', fontsize=25, fontweight='bold')
         
         elif (self.count_p1 == 0) and (self.count_p2 == 0):
             self.ani.event_source.stop()
-            self.textvar.set_visible(True)
+            Artist.remove(self.textvar)
             self.textvar = self.fig.text(0.5, 0.05, 'DRAW!', color=cm.CMRmap(0.4), ha='center', fontsize=25, fontweight='bold')
         
         elif (self.count_p1 == previous_count_p1) and (self.count_p2 == previous_count_p2):
             self.ani.event_source.stop()
+            Artist.remove(self.textvar)
             self.textvar = self.fig.text(0.5, 0.05, 'DRAW!', color=cm.CMRmap(0.4), ha='center', fontsize=25, fontweight='bold')
         
+        else:
+            boolList = []
+            temp_grid = self.data
+            self.update(self.data)
+            
+            if equalArr(temp_grid,self.data):
+                self.ani.event_source.stop()
+                Artist.remove(self.textvar)
+                self.textvar = self.fig.text(0.5, 0.05, 'DRAW!', color=cm.CMRmap(0.4), ha='center', fontsize=25, fontweight='bold')
+            
+            else:
+                boolList.append(temp_grid)
+                temp_grid = self.data
+                while True:
+                    if len(findArrList(temp_grid,boolList)) != 0:
+                        self.ani.event_source.stop()
+                        Artist.remove(self.textvar)
+                        self.textvar = self.fig.text(0.5, 0.05, 'DRAW!', color=cm.CMRmap(0.4), ha='center', fontsize=25, fontweight='bold')
+                        break
+                    else:
+                        boolList.append(temp_grid)
+                        temp_grid = self.data
+                        
     ## Select player turn to set cells
     def select_p1(self,event):
         self.current_player = 'P1'
