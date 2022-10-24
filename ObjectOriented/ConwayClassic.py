@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from matplotlib.widgets import Button
 import matplotlib.animation as animation
-import matplotlib.cm as cm
 
 """ Classes """
 
