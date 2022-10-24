@@ -283,11 +283,17 @@ class Versus():
             self.update(self.data)
             
             if equalArr(temp_grid,self.data):
+                # if the previous grid is the same as the new one, the board won't change, the game is static
+                # so it's draw
                 self.ani.event_source.stop()
                 Artist.remove(self.textvar)
                 self.textvar = self.fig.text(0.5, 0.05, 'DRAW!', color=cm.CMRmap(0.4), ha='center', fontsize=25, fontweight='bold')
             
             else:
+                # creates a list of the different grid, we look at when will the grid repeats itself
+                # when the grid isn't repeated yet, we add the current grid to the list, until we find a match
+                # the game will end when the periodicity is found.
+                
                 boolList.append(temp_grid)
                 temp_grid = self.data
                 while True:
